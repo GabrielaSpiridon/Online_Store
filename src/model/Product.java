@@ -10,6 +10,10 @@ public class Product {
     private int stockQuantity;
     private String description;
 
+    public Product(){
+
+    }
+
     public Product(int id, String name, float price, ProductType productType, int stockQuantity, String description) {
         this.id = id;
         this.name = name;
