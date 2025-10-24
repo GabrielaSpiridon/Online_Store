@@ -60,7 +60,7 @@ public class RepositoryProduct implements IRepository<Product, Integer> {
                 writer.println(line);
             }
         }catch(IOException e){
-            throw  new DataProcessingException("Eroare I/O la salvarea datelor produselor.",e);
+            throw  new DataProcessingException("Error I/O in product file",e);
         }
     }
 
@@ -82,7 +82,7 @@ public class RepositoryProduct implements IRepository<Product, Integer> {
 
                     // Validare de baza a numarului de campuri
                     if (parts.length != 6) {
-                        throw new DataProcessingException("Linie invalida la randul " + lineNumber + ": numar de campuri incorect.");
+                        throw new DataProcessingException("Invalid line at row " + lineNumber + ": incorrect number of fields (expected 6).");
                     }
 
                     // Parsarea obiectului
@@ -96,11 +96,11 @@ public class RepositoryProduct implements IRepository<Product, Integer> {
                         Product p = new Product(id, parts[1].trim(), price, type, stock, parts[5].trim());
                         products.put(id, p);
                     } catch (IllegalArgumentException e) {
-                        throw new DataProcessingException("Eroare de parsare la randul " + lineNumber + ": tip de date invalid.", e);
+                        throw new DataProcessingException("Parsing error at row " + lineNumber + ": invalid data type for product field.", e);
                     }
                 }
             } catch (FileNotFoundException e) {
-                throw new DataProcessingException("Fișierul de produse nu a fost gasit.", e);
+                throw new DataProcessingException("Product data file not found.", e);
             } catch (DataProcessingException e) {
                 System.err.println(e.getMessage());
             }
