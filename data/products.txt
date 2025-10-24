@@ -1,0 +1,4 @@
+1;Laptop Basic;3200.0;10;ELECTRONIC;Ideal pentru munca.
+2;Carte POO;65.5;25;BOOKS;Manual academic.
+3;Bluza Casual;150.0;20;CLOTHING;100% bumbac.
+10;Smart Watch V2;1200.0;15;ELECTRONIC;Latest model smartwatch.
