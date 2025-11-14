@@ -91,7 +91,6 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
                         int id = Integer.parseInt(parts[0].trim());
                         int clientId = Integer.parseInt(parts[1].trim());
 
-                        // NOU: Deserializarea folosește o metodă care nu mai creează un mock
                         Map<Product,Integer> productsMap = deserializeProducts(parts[2].trim());
 
                         LocalDateTime orderDate = LocalDateTime.parse(parts[3].trim(),DATE_FORMATTER);
@@ -142,14 +141,20 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
                     int productId = Integer.parseInt(parts[0].trim());
                     int quantity = Integer.parseInt(parts[1].trim());
 
+                    if (productId <= 0) {
+                        System.err.println("WARNING: Ignoring product with non-positive ID: " + productId);
+                        continue;
+                    }
+
                     Product minimalProduct = new Product(productId, "N/A", 0.0f, ProductType.ELECTRONIC, 0, "Minimal");
 
                     productsMap.put(minimalProduct,quantity);
                 }catch(NumberFormatException e){
-                    // Ignorăm
+
                 }
             }
         }
         return productsMap;
     }
 }
+

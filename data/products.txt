@@ -1,8 +1,8 @@
-0;PPOO Book;40.0;91;BOOKS;Added via GUI
-1;Laptop Basic;3200.0;0;ELECTRONIC;Ideal pentru munca.
-2;Carte POO;65.5;24;BOOKS;Manual academic.
-50;Smart Watch Pro;2500.0;7;ELECTRONIC;Premium Smartwatch.
-3;Bluza Casual;150.0;17;CLOTHING;100% bumbac.
-51;Java Book;50.0;5;BOOKS;Added via GUI
-52;Jeans;60.0;45;CLOTHING;Added via GUI
-10;Smart Watch V2;1200.0;14;ELECTRONIC;Latest model smartwatch.
+1;PPOO Book;40.0;88;BOOKS;Added via GUI
+2;Laptop Basic;3200.0;25;ELECTRONIC;Ideal pentru munca.
+50;Smart Watch Pro;2500.0;5;ELECTRONIC;Premium Smartwatch.
+3;Carte POO;65.5;22;BOOKS;Manual academic.
+51;Java Book;50.0;3;BOOKS;Added via GUI
+4;Bluza Casual;150.0;14;CLOTHING;100% bumbac.
+52;Jeans;60.0;38;CLOTHING;Added via GUI
+10;Smart Watch V2;1200.0;13;ELECTRONIC;Latest model smartwatch.

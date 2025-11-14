@@ -341,7 +341,6 @@ public class StoreGUI extends JFrame {
             }
         });
 
-        // Logica Adăugare în Coș
         addToCartButton.addActionListener(e -> {
             try {
                 if (selectedProductIdField.getText().isEmpty()) {

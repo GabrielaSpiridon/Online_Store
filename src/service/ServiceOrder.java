@@ -11,17 +11,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Service Class pentru entitatea Order.
+ * Contine logica de tranzactie (plasare comanda) si raportare.
+ */
 public class ServiceOrder {
     private final IRepository<Order, Integer> orderRepository;
     private final ServiceProduct serviceProduct;
 
     private static AtomicInteger nextId = new AtomicInteger(1);
 
+    /**
+     * Constructor cu Injectie de Dependenta.
+     */
     public ServiceOrder(IRepository<Order, Integer> orderRepository, ServiceProduct serviceProduct) {
         this.orderRepository = orderRepository;
         this.serviceProduct = serviceProduct;
     }
 
+    /**
+     * Seteaza ID-ul de la care va incepe generarea (folosit la pornirea aplicatiei).
+     */
     public static void setInitialId(int maxId) {
         if (maxId >= nextId.get()) {
             nextId.set(maxId + 1);
@@ -42,44 +52,40 @@ public class ServiceOrder {
         System.out.println("SERVICE: Order " + id + " deleted successfully.");
     }
 
-    /**
-     * Calculează numărul total de unități comandate pentru fiecare produs.
-     * @return Map<String, Integer> unde cheia este numele produsului, iar valoarea este totalul unităților vândute.
-     */
+    // Metoda ajutatoare pentru a gasi detaliile Produsului REAL folosind ServiceProduct.
     private Product findRealProductDetails(int productId) {
         return serviceProduct.findProductById(productId);
     }
 
     /**
-     * Calculează numărul total de unități comandate pentru fiecare produs.
-     * @return Map<String, Integer> unde cheia este numele produsului, iar valoarea este totalul unităților vândute.
+     * Calculeaza numarul total de unitati comandate pentru fiecare produs.
+     * Aceasta functie foloseste ProductService pentru a gasi numele corect al produsului.
+     * @return Map<String, Integer> unde cheia este numele produsului, iar valoarea este totalul unitatilor vandute.
      */
     public Map<String, Integer> getUnitsSoldPerProduct() {
         Map<String, Integer> salesReport = new HashMap<>();
         List<Order> allOrders = orderRepository.findAll();
 
         for (Order order : allOrders) {
-            // Iterează prin produsele din coșul fiecărei comenzi
             for (Map.Entry<Product, Integer> item : order.getProducts().entrySet()) {
 
-                Product realProduct = findRealProductDetails(item.getKey().getId());
+                int productId = item.getKey().getId();
+                Product realProduct = findRealProductDetails(productId);
 
                 if (realProduct != null) {
                     String productName = realProduct.getName();
                     int quantitySold = item.getValue();
                     salesReport.put(productName, salesReport.getOrDefault(productName, 0) + quantitySold);
                 }
+
             }
         }
         return salesReport;
     }
 
+
     /**
      * Finalizeaza o comanda: calculeaza totalul, scade stocul si salveaza.
-     * @param clientId ID-ul clientului care plaseaza comanda.
-     * @param productsInCart Map<Product, Integer> cu produsele si cantitatea dorita.
-     * @return Obiectul Order nou creat.
-     * @throws InvalidDataException Daca stocul este insuficient.
      */
     public Order placeOrder(int clientId, Map<Product, Integer> productsInCart) throws InvalidDataException{
         for(Map.Entry<Product, Integer> entry : productsInCart.entrySet()){
@@ -127,5 +133,4 @@ public class ServiceOrder {
         orderRepository.saveAllData();
         System.out.println("SERVICE: Order data saved successfully.");
     }
-
 }
