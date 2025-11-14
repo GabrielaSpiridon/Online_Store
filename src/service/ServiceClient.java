@@ -109,7 +109,7 @@ public class ServiceClient {
      * @return Optional<Client> care contine clientul gasit sau este gol.
      */
     public Optional<Client> authenticate(String email, String password) {
-        // Logica simplificata cu bucla for-each:
+
         for (Client c : clientRepository.findAll()) {
             // Compara email-ul (insensibil la majuscule) si parola (sensibila)
             if (c.getEmail().equalsIgnoreCase(email) && c.getPassword().equals(password)) {

@@ -9,12 +9,10 @@ public enum ProductType {
          * Produse electronice (telefoane, laptopuri, accesorii).
          */
         ELECTRONIC,
-
         /**
          * Carti, manuale sau alte materiale de lectura.
          */
         BOOKS,
-
         /**
          * Articole de imbracaminte si incaltaminte.
          */
