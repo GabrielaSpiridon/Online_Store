@@ -10,6 +10,7 @@ import model.Client;
 import model.Order;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -19,13 +20,21 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
-import java.util.Optional; // Necesar pentru Login
+import java.util.Optional;
 
 /**
  * Interfata Grafica (GUI) a aplicatiei, folosind Java Swing (Cerința 7).
- * Include logica de Coș de Cumpărături și Autentificare.
+ * Include logica de Coș de Cumpărături și Autentificare cu stil îmbunătățit.
  */
 public class StoreGUI extends JFrame {
+
+    // --- CONSTANTE VIZUALE ---
+    private static final Color BACKGROUND_COLOR = new Color(248, 248, 255); // Soft White
+    private static final Color PRIMARY_COLOR = new Color(28, 102, 180); // Dark Blue (For Action Buttons)
+    private static final Color SECONDARY_COLOR = new Color(230, 230, 230); // Gray for secondary backgrounds
+    private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 15);
+    private static final Font UI_FONT = new Font("Segoe UI", Font.PLAIN, 12);
+    private static final Font STATUS_FONT = new Font("Arial", Font.ITALIC, 12);
 
     private final ServiceProduct serviceProduct;
     private final ServiceClient serviceClient;
@@ -38,12 +47,12 @@ public class StoreGUI extends JFrame {
     private JTextField selectedProductNameField;
     private JLabel cartStatusLabel;
     private JTextArea cartDisplayArea;
-    private JLabel clientStatusLabel; // NOU: Etichetă pentru statusul clientului
+    private JLabel clientStatusLabel; // Etichetă pentru statusul clientului
 
     // Coșul de cumpărături temporar
     private final Map<Product, Integer> temporaryCart = new HashMap<>();
 
-    // NOU: Utilizează Optional pentru a gestiona starea de Login (evită null)
+    // Starea clientului logat
     private Optional<Client> loggedInUser = Optional.empty();
 
     public StoreGUI(ServiceProduct sp, ServiceClient sc, ServiceOrder so) {
@@ -52,7 +61,7 @@ public class StoreGUI extends JFrame {
         this.serviceOrder = so;
 
         setTitle("Online Store Management (GUI)");
-        setSize(800, 550);
+        setSize(850, 600); // Mărim puțin fereastra
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -63,31 +72,43 @@ public class StoreGUI extends JFrame {
             }
         });
 
+        // Aplică culoarea de fundal principală
+        getContentPane().setBackground(BACKGROUND_COLOR);
+
         // Configurare Layout principal (Tab-uri)
         JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(HEADER_FONT);
+
+        tabbedPane.addTab("Client Access", createClientAccessPanel());
         tabbedPane.addTab("Product Management", createProductPanel());
-        tabbedPane.addTab("Place Order (Tranzacție)", createOrderPanel());
+        tabbedPane.addTab("Place Order", createOrderPanel());
         tabbedPane.addTab("Reports", createReportsPanel());
-        tabbedPane.addTab("Client Access", createClientAccessPanel()); // NOU Tab
 
         add(tabbedPane, BorderLayout.CENTER);
         setVisible(true);
         loadProductData();
     }
 
-    // --- Panou Nou: GESTIONARE ACCES CLIENT (Login/Register) ---
+    // --- Panou 4: GESTIONARE ACCES CLIENT (Login/Register) ---
 
     private JPanel createClientAccessPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 30, 30, 30));
 
         // Status
         clientStatusLabel = new JLabel("Status: Logged out.", SwingConstants.CENTER);
+        clientStatusLabel.setFont(HEADER_FONT.deriveFont(Font.BOLD, 18)); // Font mai mare
 
         // Butoane
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 30));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+
         JButton loginButton = new JButton("Login");
+        styleButton(loginButton, PRIMARY_COLOR, Color.WHITE); // Stil principal
+
         JButton registerButton = new JButton("Register New Account");
+        styleButton(registerButton, Color.GRAY, Color.WHITE); // Stil secundar
 
         loginButton.addActionListener(e -> showLoginDialog());
         registerButton.addActionListener(e -> showRegisterDialog());
@@ -107,10 +128,13 @@ public class StoreGUI extends JFrame {
         JTextField emailField = new JTextField(15);
         JPasswordField passwordField = new JPasswordField(15);
 
-        JPanel loginPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        loginPanel.add(new JLabel("Email:"));
+        emailField.setFont(UI_FONT);
+        passwordField.setFont(UI_FONT);
+
+        JPanel loginPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        loginPanel.add(new JLabel("Email:", SwingConstants.RIGHT));
         loginPanel.add(emailField);
-        loginPanel.add(new JLabel("Password:"));
+        loginPanel.add(new JLabel("Password:", SwingConstants.RIGHT));
         loginPanel.add(passwordField);
 
         int result = JOptionPane.showConfirmDialog(this, loginPanel, "Client Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -119,7 +143,6 @@ public class StoreGUI extends JFrame {
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
 
-            // Apelează Service-ul pentru autentificare
             loggedInUser = serviceClient.authenticate(email, password);
 
             if (loggedInUser.isPresent()) {
@@ -141,28 +164,29 @@ public class StoreGUI extends JFrame {
         JTextField addressField = new JTextField(15);
         JTextField phoneField = new JTextField(15);
 
-        JPanel registerPanel = new JPanel(new GridLayout(5, 2, 5, 5));
-        registerPanel.add(new JLabel("Name:"));
+        nameField.setFont(UI_FONT); emailField.setFont(UI_FONT); passwordField.setFont(UI_FONT); addressField.setFont(UI_FONT); phoneField.setFont(UI_FONT);
+
+        JPanel registerPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        registerPanel.add(new JLabel("Name:", SwingConstants.RIGHT));
         registerPanel.add(nameField);
-        registerPanel.add(new JLabel("Email:"));
+        registerPanel.add(new JLabel("Email:", SwingConstants.RIGHT));
         registerPanel.add(emailField);
-        registerPanel.add(new JLabel("Password (min 6):"));
+        registerPanel.add(new JLabel("Password (min 6):", SwingConstants.RIGHT));
         registerPanel.add(passwordField);
-        registerPanel.add(new JLabel("Address:"));
+        registerPanel.add(new JLabel("Address:", SwingConstants.RIGHT));
         registerPanel.add(addressField);
-        registerPanel.add(new JLabel("Phone:"));
+        registerPanel.add(new JLabel("Phone:", SwingConstants.RIGHT));
         registerPanel.add(phoneField);
 
         int result = JOptionPane.showConfirmDialog(this, registerPanel, "Register New Client", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
             try {
-                // Creează obiectul Client cu ID=0 (Service va atribui ID-ul)
                 Client newClient = new Client(0, nameField.getText(), emailField.getText(),
                         new String(passwordField.getPassword()),
                         addressField.getText(), phoneField.getText());
 
-                serviceClient.saveOrUpdateClient(newClient); // Validează și salvează
+                serviceClient.saveOrUpdateClient(newClient);
                 JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.");
 
             } catch (InvalidDataException ex) {
@@ -176,15 +200,24 @@ public class StoreGUI extends JFrame {
 
     private JPanel createProductPanel() {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         String[] columnNames = {"ID", "Name", "Price", "Stock", "Type"};
         productTableModel = new DefaultTableModel(columnNames, 0);
         productTable = new JTable(productTableModel);
+        productTable.getTableHeader().setFont(HEADER_FONT);
+        productTable.setFont(UI_FONT);
+
         panel.add(new JScrollPane(productTable), BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
+
         JButton refreshButton = new JButton("Refresh Stock");
+        styleButton(refreshButton);
         JButton addButton = new JButton("Add New Product");
+        styleButton(addButton);
 
         refreshButton.addActionListener(e -> loadProductData());
         addButton.addActionListener(e -> showAddProductDialog());
@@ -216,14 +249,15 @@ public class StoreGUI extends JFrame {
         JTextField priceField = new JTextField();
         JTextField stockField = new JTextField();
 
-        Object[] message = {
-                "Product Name:", nameField,
-                "Price:", priceField,
-                "Stock Quantity:", stockField,
-                "Product Type:", typeDropdown
-        };
+        nameField.setFont(UI_FONT); priceField.setFont(UI_FONT); stockField.setFont(UI_FONT); typeDropdown.setFont(UI_FONT);
 
-        int option = JOptionPane.showConfirmDialog(this, message, "Add New Product", JOptionPane.OK_CANCEL_OPTION);
+        JPanel inputPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        inputPanel.add(new JLabel("Product Name:", SwingConstants.RIGHT)); inputPanel.add(nameField);
+        inputPanel.add(new JLabel("Price:", SwingConstants.RIGHT)); inputPanel.add(priceField);
+        inputPanel.add(new JLabel("Stock Quantity:", SwingConstants.RIGHT)); inputPanel.add(stockField);
+        inputPanel.add(new JLabel("Product Type:", SwingConstants.RIGHT)); inputPanel.add(typeDropdown);
+
+        int option = JOptionPane.showConfirmDialog(this, inputPanel, "Add New Product", JOptionPane.OK_CANCEL_OPTION);
 
         if (option == JOptionPane.OK_OPTION) {
             try {
@@ -250,20 +284,25 @@ public class StoreGUI extends JFrame {
 
     private JPanel createOrderPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(BACKGROUND_COLOR);
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // A. Panou Central (Tabel Produse stanga, Sumar Cos dreapta)
-        JPanel centerPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        JPanel centerPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         JTable orderProductTable = new JTable(productTableModel); // Tabel produse stânga
+        orderProductTable.getTableHeader().setFont(HEADER_FONT);
         centerPanel.add(new JScrollPane(orderProductTable));
 
         // B. Sumar Coș (Dreapta)
         JPanel cartSummaryPanel = new JPanel(new BorderLayout(5, 5));
-        cartSummaryPanel.setBorder(BorderFactory.createTitledBorder("Shopping Cart Summary"));
+        cartSummaryPanel.setBackground(SECONDARY_COLOR);
+        cartSummaryPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Shopping Cart Summary", 0, 0, HEADER_FONT));
 
-        cartDisplayArea = new JTextArea(8, 20); // Zonă de text pentru conținut
+        cartDisplayArea = new JTextArea(8, 20);
         cartDisplayArea.setEditable(false);
+        cartDisplayArea.setFont(UI_FONT);
         cartStatusLabel = new JLabel("Cart: 0 unique items | Total: 0.00 RON");
+        cartStatusLabel.setFont(HEADER_FONT);
 
         cartSummaryPanel.add(new JScrollPane(cartDisplayArea), BorderLayout.CENTER);
         cartSummaryPanel.add(cartStatusLabel, BorderLayout.SOUTH);
@@ -272,7 +311,8 @@ public class StoreGUI extends JFrame {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
         // C. Panoul de Input/Acțiune (JOS - SUD)
-        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 5));
+        JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        inputPanel.setBackground(BACKGROUND_COLOR);
 
         selectedProductIdField = new JTextField();
         selectedProductIdField.setEditable(false);
@@ -280,9 +320,12 @@ public class StoreGUI extends JFrame {
         selectedProductNameField.setEditable(false);
 
         JTextField quantityField = new JTextField();
+        quantityField.setFont(UI_FONT);
 
         JButton addToCartButton = new JButton("Add to Cart");
+        styleButton(addToCartButton);
         JButton placeOrderButton = new JButton("Place Order");
+        styleButton(placeOrderButton, PRIMARY_COLOR, Color.WHITE);
 
         // Logica de Selecție pe Click
         orderProductTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -316,13 +359,11 @@ public class StoreGUI extends JFrame {
                     throw new InvalidDataException("Product not found in system.");
                 }
 
-                // Validează stocul
                 int currentCartQuantity = temporaryCart.getOrDefault(productToAdd, 0);
                 if (productToAdd.getStockQuantity() < (currentCartQuantity + quantity)) {
-                    throw new InvalidDataException("Insufficient stock available for this quantity.");
+                    throw new InvalidDataException("Insufficient stock available for this quantity. Current stock: " + productToAdd.getStockQuantity());
                 }
 
-                // Adaugă/Acumulează în coș
                 temporaryCart.put(productToAdd, currentCartQuantity + quantity);
 
                 updateCartDisplay();
@@ -362,11 +403,11 @@ public class StoreGUI extends JFrame {
         });
 
         // Adăugarea componentelor la Panoul de Input
-        inputPanel.add(new JLabel("Selected Product Name:"));
+        inputPanel.add(new JLabel("Selected Product Name:", SwingConstants.RIGHT));
         inputPanel.add(selectedProductNameField);
-        inputPanel.add(new JLabel("Product ID (Auto-Selected):"));
+        inputPanel.add(new JLabel("Product ID (Auto-Selected):", SwingConstants.RIGHT));
         inputPanel.add(selectedProductIdField);
-        inputPanel.add(new JLabel("Quantity to Add:"));
+        inputPanel.add(new JLabel("Quantity to Add:", SwingConstants.RIGHT));
         inputPanel.add(quantityField);
 
         inputPanel.add(addToCartButton);
@@ -376,7 +417,6 @@ public class StoreGUI extends JFrame {
         return mainPanel;
     }
 
-    // NOU: Metodă pentru a calcula și afișa conținutul coșului
     private void updateCartDisplay() {
         cartDisplayArea.setText("");
         float total = 0.0f;
@@ -403,18 +443,36 @@ public class StoreGUI extends JFrame {
 
     private JPanel createReportsPanel() {
         JPanel panel = new JPanel(new GridLayout(0, 1, 10, 10));
-        panel.setBorder(BorderFactory.createTitledBorder("Statistics (Cerința 1)"));
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(BorderFactory.createTitledBorder("Statistics"));
 
         float totalValue = serviceProduct.calculateTotalStockValue();
         int totalOrders = serviceOrder.findAllOrders().size();
 
         JLabel valueLabel = new JLabel("Total Stock Value: " + String.format("%.2f RON", totalValue));
-        JLabel ordersLabel = new JLabel("Total Orders Placed (Since Launch): " + totalOrders);
+        valueLabel.setFont(HEADER_FONT);
+        JLabel ordersLabel = new JLabel("Total Orders Placed:  " + totalOrders);
+        ordersLabel.setFont(HEADER_FONT);
 
         panel.add(valueLabel);
         panel.add(ordersLabel);
 
         return panel;
+    }
+
+    // --- Metodă Utilitară pentru Stil ---
+    private void styleButton(JButton button) {
+        button.setFont(HEADER_FONT);
+        button.setBackground(Color.LIGHT_GRAY);
+        button.setForeground(Color.BLACK);
+        button.setFocusPainted(false);
+    }
+
+    private void styleButton(JButton button, Color background, Color foreground) {
+        button.setFont(HEADER_FONT);
+        button.setBackground(background);
+        button.setForeground(foreground);
+        button.setFocusPainted(false);
     }
 
     // --- 0. ÎNCHIDERE ȘI SALVARE (Cerința 2) ---
