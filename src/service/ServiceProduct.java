@@ -4,9 +4,12 @@ import model.Product;
 import repository.IRepository;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServiceProduct {
     private final IRepository<Product,Integer> productRepository;
+
+    private static AtomicInteger nextId = new AtomicInteger(1);
 
     public ServiceProduct(IRepository<Product, Integer> productRepository) {
         this.productRepository = productRepository;
@@ -18,6 +21,18 @@ public class ServiceProduct {
      * @throws InvalidDataException Daca pretul sau alte campuri esentiale sunt invalide.
      */
 
+
+    /**
+     * Setează ID-ul de la care va începe generarea (folosit la pornirea aplicației).
+     * @param maxId ID-ul maxim găsit în fișier.
+     */
+    public static void setInitialId(int maxId) { // ADĂUGAT
+        if (maxId >= 0) {
+            nextId.set(maxId + 1);
+        }
+    }
+
+
     public void saveOrUpdateProduct(Product p) throws InvalidDataException{
         if(p.getPrice()<=0){
             throw new InvalidDataException("The price for product '" + p.getName() + "' must be strictly positive.");
@@ -27,6 +42,10 @@ public class ServiceProduct {
         }
         if (p.getStockQuantity() < 0) {
             throw new InvalidDataException("Stock quantity cannot be negative for product '" + p.getName() + "'.");
+        }
+
+        if (p.getId() <= 0) {
+            p.setId(nextId.getAndIncrement());
         }
 
         productRepository.save(p);
@@ -50,12 +69,33 @@ public class ServiceProduct {
         p.setStockQuantity(p.getStockQuantity() - quantity);
         productRepository.save(p);
     }
+
+    public Product findProductById(Integer id) {
+        return productRepository.findById(id);
+    }
+
     /**
      * Returneaza lista tuturor produselor.
      */
     public List<Product> findAllProducts() {
         return productRepository.findAll();
     }
+
+    /**
+     * Calculeaza valoarea monetara totala a intregului stoc de produse.
+     * Implementeaza logica pentru Rapoarte.
+     */
+    public float calculateTotalStockValue() {
+        float total = 0.0f;
+
+        for (Product p : productRepository.findAll()) {
+            total += p.getPrice() * p.getStockQuantity();
+        }
+
+        return total;
+    }
+
+
 
     /**
      * Salveaza toate datele in fisier

@@ -1,46 +1,50 @@
 package app;
 
+import model.Client;
+import model.Order;
 import model.Product;
-import model.ProductType;
-import repository.IRepository;
-import repository.RepositoryProduct;
-import service.InvalidDataException;
-import service.ServiceProduct;
+import repository.*;
+import service.*;
+import ui.StoreGUI;
+import java.util.Comparator;
 import java.util.List;
+import javax.swing.SwingUtilities;
 
 public class Main {
+
+    // Metodă ajutătoare pentru a găsi ID-ul maxim (simplificat)
+    // Folosește un extractor de funcții pentru a obține ID-ul din orice entitate
+    private static <T> int findMaxId(List<T> entities, java.util.function.ToIntFunction<T> idExtractor) {
+        return entities.stream()
+                .mapToInt(idExtractor)
+                .max().orElse(0);
+    }
+
     public static void main(String[] args) {
 
-        System.out.println("--- Online Store ---");
+        System.out.println("--- Online Store Application Starting GUI ---");
 
+        // 1. INIȚIALIZAREA REPOSITORIES ȘI SERVICE-URILOR
         IRepository<Product, Integer> productRepo = new RepositoryProduct();
+        IRepository<Client, Integer> clientRepo = new RepositoryClient();
+        IRepository<Order, Integer> orderRepo = new RepositoryOrder();
+
         ServiceProduct productService = new ServiceProduct(productRepo);
+        ServiceClient clientService = new ServiceClient(clientRepo);
+        ServiceOrder orderService = new ServiceOrder(orderRepo, productService);
 
-        System.out.println("\n--- 2. Initial Product Data ---");
-        productService.findAllProducts().forEach(p -> System.out.println("Loaded: " + p.getName()));
+        // 2. GESTIUNEA ID-urilor la pornire (Cerința 2: Prevenirea Coliziunilor)
 
-        try {
-            Product pNew = new Product(10, "Smart Watch V2", 1200.0f, ProductType.ELECTRONIC, 20, "Latest model smartwatch.");
-            productService.saveOrUpdateProduct(pNew);
-        } catch (InvalidDataException e) {
-            System.err.println("Validation Error Caught (Valid Product Test): " + e.getMessage());
-        }
+        // Product::getId este o referință la metoda, folosită de idExtractor
+        ServiceProduct.setInitialId(findMaxId(productService.findAllProducts(), Product::getId));
+        ServiceClient.setInitialId(findMaxId(clientService.findAllClients(), Client::getId));
+        ServiceOrder.setInitialId(findMaxId(orderService.findAllOrders(), Order::getId));
 
-        try {
-            Product pInvalid = new Product(11, "Free eBook", 0.0f, ProductType.BOOKS, 100, "Book with zero price.");
-            productService.saveOrUpdateProduct(pInvalid);
-        } catch (InvalidDataException e) {
-            System.err.println("\nValidation Error Caught (Invalid Product Test): " + e.getMessage());
-        }
+        System.out.println("Initialization complete. Data loaded and IDs set.");
 
-        try {
-            productService.decreaseStock(10, 5);
-        } catch (InvalidDataException e) {
-            System.err.println("\nStock Error: " + e.getMessage());
-        }
-
-        productService.shutdownApplicationAndSaveData();
-
-
+        // 3. PORNIREA INTERFEȚEI GRAFICE (Cerința 7)
+        SwingUtilities.invokeLater(() -> {
+            new StoreGUI(productService, clientService, orderService);
+        });
     }
 }

@@ -1,0 +1,3 @@
+1;John Smith;john.s@example.com;pass123;123 Main St, NY;0721234567
+2;Jane Doe;jane.d@example.com;pass456;45 Oak Ave, CA;0739876543
+100;Test User;test@test.com;secure123;10 Test St, NY;0700112233
