@@ -3,9 +3,13 @@ package service;
 import model.Client;
 import repository.IRepository;
 import java.util.List;
+import java.util.Optional; // Import nou pentru metoda authenticate
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Optional;
 
+/**
+ * Clasa ServiceClient contine logica de business pentru entitatea Client.
+ * Gestioneaza validarea datelor, autentificarea si coordoneaza operatiunile CRUD.
+ */
 public class ServiceClient {
 
     private final IRepository<Client, Integer> clientRepository;
@@ -21,7 +25,7 @@ public class ServiceClient {
 
     /**
      * Seteaza ID-ul de la care va incepe generarea (folosit la pornirea aplicatiei).
-     * @param maxId ID-ul maxim gasit în fisier.
+     * @param maxId ID-ul maxim gasit in fisier.
      */
     public static void setInitialId(int maxId) {
         if (maxId >= 0) {
@@ -31,7 +35,7 @@ public class ServiceClient {
 
 
     /**
-     * Valideaza datele unui obiect Client.
+     * Valideaza datele unui obiect Client (Regula de Business).
      * @param client Obiectul Client de validat.
      * @throws InvalidDataException Daca datele nu sunt valide.
      */
@@ -50,9 +54,10 @@ public class ServiceClient {
     // --- Metode CRUD ---
 
     /**
-     * Salvează sau actualizează un client.
+     * Salveaza sau actualizeaza un client (Register).
+     * Aplica validarea si atribuie un ID nou daca este o inregistrare noua.
      * @param client Clientul de salvat/actualizat.
-     * @throws InvalidDataException Dacă datele clientului nu sunt valide.
+     * @throws InvalidDataException Daca datele clientului nu sunt valide.
      */
     public void saveOrUpdateClient(Client client) throws InvalidDataException {
         validateClient(client);
@@ -68,26 +73,26 @@ public class ServiceClient {
     }
 
     /**
-     * Găsește un client după ID.
+     * Gaseste un client dupa ID.
      * @param id ID-ul clientului.
-     * @return Clientul găsit sau null.
+     * @return Clientul gasit sau null.
      */
     public Client findClientById(Integer id) {
         return clientRepository.findById(id);
     }
 
     /**
-     * Returnează toți clienții.
-     * @return Lista tuturor clienților.
+     * Returneaza toti clientii.
+     * @return Lista tuturor clientilor.
      */
     public List<Client> findAllClients() {
         return clientRepository.findAll();
     }
 
     /**
-     * Șterge un client după ID.
-     * @param id ID-ul clientului de șters.
-     * @throws InvalidDataException Dacă ID-ul nu este valid sau clientul nu există.
+     * Sterge un client dupa ID.
+     * @param id ID-ul clientului de sters.
+     * @throws InvalidDataException Daca ID-ul nu este valid sau clientul nu exista.
      */
     public void deleteClient(Integer id) throws InvalidDataException {
         if (clientRepository.findById(id) == null) {
@@ -98,24 +103,26 @@ public class ServiceClient {
 
 
     /**
-     * Autentifica un client pe baza email-ului si parolei
-     * @param email Email-ul introdus de utilizator.
-     * @param password Parola introdusa de utilizator.
-     * @return Un Optional ce contine clientul, daca autentificarea reuseste
+     * Autentifica un client pe baza email-ului si parolei (Login).
+     * @param email Email-ul introdus.
+     * @param password Parola introdusa.
+     * @return Optional<Client> care contine clientul gasit sau este gol.
      */
     public Optional<Client> authenticate(String email, String password) {
-        List<Client> allClients = clientRepository.findAll();
-
-        for (Client client : allClients) {
-            if (client.getEmail().equalsIgnoreCase(email) && client.getPassword().equals(password)) {
-                return Optional.of(client);
+        // Logica simplificata cu bucla for-each:
+        for (Client c : clientRepository.findAll()) {
+            // Compara email-ul (insensibil la majuscule) si parola (sensibila)
+            if (c.getEmail().equalsIgnoreCase(email) && c.getPassword().equals(password)) {
+                return Optional.of(c);
             }
         }
         return Optional.empty();
     }
 
+    // --- Persistenta ---
+
     /**
-     * Salvează toate datele în fișier înainte de oprirea aplicației.
+     * Salveaza toate datele clientilor in fisier inainte de oprirea aplicatiei.
      */
     public void shutdownApplicationAndSaveData() {
         clientRepository.saveAllData();

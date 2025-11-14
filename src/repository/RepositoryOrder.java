@@ -24,6 +24,9 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
     // Formatter necesar pentru a converti LocalDateTime in String si invers (Cerinta 1)
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    /**
+     * Constructor. Initializeaza colectia si incarca datele la pornire.
+     */
     public RepositoryOrder(){
         this.orders = new HashMap<>();
         loadAllData();
@@ -33,26 +36,48 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
     // Implementarea Operatiunilor CRUD (din IRepository)
     // ----------------------------------------------------------------------
 
+    /**
+     * Salveaza sau actualizeaza o comanda in colectia din memorie.
+     * @param order Comanda de salvat/actualizat.
+     */
     @Override
     public void save(Order order) {
         orders.put(order.getId(),order);
     }
 
+    /**
+     * Cauta o comanda dupa ID.
+     * @param id ID-ul comenzii (Integer - clasa wrapper).
+     * @return Comanda gasita sau null.
+     */
     @Override
     public Order findById(Integer id) {
         return orders.get(id);
     }
 
+    /**
+     * Returneaza lista tuturor comenzilor din memorie.
+     * @return Lista de obiecte Order.
+     */
     @Override
     public List<Order> findAll() {
         return new ArrayList<>(orders.values());
     }
 
+    /**
+     * Sterge o comanda dupa ID.
+     * @param id ID-ul comenzii de sters (Integer - clasa wrapper).
+     */
     @Override
     public void delete(Integer id) {
         orders.remove(id);
     }
 
+    /**
+     * Salveaza toate datele din memorie in fisierul text (orders.txt).
+     * Implementeaza Cerinta 2 (Salvare la inchidere).
+     * @throws DataProcessingException Daca apare o eroare de I/O.
+     */
     @Override
     public void saveAllData() {
         try(PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))){
@@ -72,6 +97,10 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
         }
     }
 
+    /**
+     * Incarca datele din orders.txt in colectia din memorie la pornirea aplicatiei.
+     * Implementeaza Cerinta 2 (Restaurare).
+     */
     @Override
     public void loadAllData() {
         File file = new File(FILE_NAME);
@@ -111,7 +140,12 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
         }
     }
 
-
+    /**
+     * Serializare: Salveaza ID-ul, Numele si Pretul produsului, plus cantitatea.
+     * Format: ID,Nume,Pret:Cantitate | ID,Nume,Pret:Cantitate
+     * @param products Colectia de produse din comanda.
+     * @return String serializat pentru salvarea in fisier.
+     */
     private String serializeProducts(Map<Product, Integer> products){
         if (products.isEmpty()){
             return "";
@@ -127,6 +161,11 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
         return sb.toString();
     }
 
+    /**
+     * Deserializare: Reconstruieste obiectul Product din ID, Nume si Pret citite din fisier.
+     * @param productsString String-ul serializat citit din orders.txt.
+     * @return Map<Product, Integer> reconstruita.
+     */
     private Map<Product, Integer> deserializeProducts(String productsString){
         Map<Product, Integer> productsMap = new HashMap<>();
         if(productsString.isEmpty()){

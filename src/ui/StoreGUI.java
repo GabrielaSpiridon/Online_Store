@@ -27,9 +27,9 @@ import javax.swing.event.ListSelectionEvent;
 public class StoreGUI extends JFrame {
 
     // --- CONSTANTE VIZUALE ---
-    private static final Color BACKGROUND_COLOR = new Color(248, 248, 255); // Soft White
-    private static final Color PRIMARY_COLOR = new Color(28, 102, 180); // Dark Blue (For Action Buttons)
-    private static final Color SECONDARY_COLOR = new Color(230, 230, 230); // Gray for secondary backgrounds
+    private static final Color BACKGROUND_COLOR = new Color(248, 248, 255);
+    private static final Color PRIMARY_COLOR = new Color(28, 102, 180);
+    private static final Color SECONDARY_COLOR = new Color(230, 230, 230);
     private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 15);
     private static final Font UI_FONT = new Font("Segoe UI", Font.PLAIN, 12);
     private static final Font STATUS_FONT = new Font("Arial", Font.ITALIC, 12);
@@ -40,14 +40,13 @@ public class StoreGUI extends JFrame {
     private DefaultTableModel productTableModel;
     private JTable productTable;
 
-    // Câmpuri UI pentru comandă
     private JTextField selectedProductIdField;
     private JTextField selectedProductNameField;
     private JLabel cartStatusLabel;
     private JTextArea cartDisplayArea;
-    private JLabel clientStatusLabel; // Etichetă pentru statusul clientului
+    private JLabel clientStatusLabel;
 
-    // Coșul de cumpărături temporar
+    // Cosul de cumparaturi temporar
     private final Map<Product, Integer> temporaryCart = new HashMap<>();
 
     // Starea clientului logat
@@ -58,8 +57,8 @@ public class StoreGUI extends JFrame {
         this.serviceClient = sc;
         this.serviceOrder = so;
 
-        setTitle("Online Store Management (GUI)");
-        setSize(850, 600); // Mărim puțin fereastra
+        setTitle("Online Store");
+        setSize(850, 600);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -70,7 +69,6 @@ public class StoreGUI extends JFrame {
             }
         });
 
-        // Aplică culoarea de fundal principală
         getContentPane().setBackground(BACKGROUND_COLOR);
 
         // Configurare Layout principal (Tab-uri)
@@ -87,8 +85,6 @@ public class StoreGUI extends JFrame {
         loadProductData();
     }
 
-    // --- Panou 4: GESTIONARE ACCES CLIENT (Login/Register) ---
-
     private JPanel createClientAccessPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(BACKGROUND_COLOR);
@@ -96,17 +92,17 @@ public class StoreGUI extends JFrame {
 
         // Status
         clientStatusLabel = new JLabel("Status: Logged out.", SwingConstants.CENTER);
-        clientStatusLabel.setFont(HEADER_FONT.deriveFont(Font.BOLD, 18)); // Font mai mare
+        clientStatusLabel.setFont(HEADER_FONT.deriveFont(Font.BOLD, 18));
 
         // Butoane
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 30));
         buttonPanel.setBackground(BACKGROUND_COLOR);
 
         JButton loginButton = new JButton("Login");
-        styleButton(loginButton, PRIMARY_COLOR, Color.WHITE); // Stil principal
+        styleButton(loginButton, PRIMARY_COLOR, Color.WHITE);
 
         JButton registerButton = new JButton("Register New Account");
-        styleButton(registerButton, Color.GRAY, Color.WHITE); // Stil secundar
+        styleButton(registerButton, Color.GRAY, Color.WHITE);
 
         loginButton.addActionListener(e -> showLoginDialog());
         registerButton.addActionListener(e -> showRegisterDialog());
@@ -119,8 +115,6 @@ public class StoreGUI extends JFrame {
 
         return panel;
     }
-
-    // --- Metoda de LOGIN ---
 
     private void showLoginDialog() {
         JTextField emailField = new JTextField(15);
@@ -152,8 +146,6 @@ public class StoreGUI extends JFrame {
             }
         }
     }
-
-    // --- Metoda de REGISTER ---
 
     private void showRegisterDialog() {
         JTextField nameField = new JTextField(15);
@@ -193,9 +185,6 @@ public class StoreGUI extends JFrame {
             }
         }
     }
-
-
-    // --- Panou 1: GESTIONARE PRODUSE (CRUD) ---
 
     private JPanel createProductPanel() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -279,20 +268,18 @@ public class StoreGUI extends JFrame {
         }
     }
 
-    // --- Panou 2: PLASARE COMANDĂ (Tranzacție C.7) ---
-
     private JPanel createOrderPanel() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBackground(BACKGROUND_COLOR);
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // A. Panou Central (Tabel Produse stanga, Sumar Cos dreapta)
+        // A. Panou Central
         JPanel centerPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         JTable orderProductTable = new JTable(productTableModel); // Tabel produse stânga
         orderProductTable.getTableHeader().setFont(HEADER_FONT);
         centerPanel.add(new JScrollPane(orderProductTable));
 
-        // B. Sumar Coș (Dreapta)
+        // B. Sumar Cos
         JPanel cartSummaryPanel = new JPanel(new BorderLayout(5, 5));
         cartSummaryPanel.setBackground(SECONDARY_COLOR);
         cartSummaryPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Shopping Cart Summary", 0, 0, HEADER_FONT));
@@ -309,7 +296,7 @@ public class StoreGUI extends JFrame {
 
         mainPanel.add(centerPanel, BorderLayout.CENTER);
 
-        // C. Panoul de Input/Acțiune (JOS - SUD)
+        // C. Panoul de Input/Actiune
         JPanel inputPanel = new JPanel(new GridLayout(5, 2, 10, 10));
         inputPanel.setBackground(BACKGROUND_COLOR);
 
@@ -326,7 +313,7 @@ public class StoreGUI extends JFrame {
         JButton placeOrderButton = new JButton("Place Order");
         styleButton(placeOrderButton, PRIMARY_COLOR, Color.WHITE);
 
-        // Logica de Selecție pe Click
+        // Logica de Selectie pe Click
         orderProductTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -375,7 +362,7 @@ public class StoreGUI extends JFrame {
             }
         });
 
-        // Logica Plasare Comandă
+        // Logica Plasare Comanda
         placeOrderButton.addActionListener(e -> {
             if (loggedInUser.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "ERROR: Please log in before placing an order.", "Order Error", JOptionPane.ERROR_MESSAGE);
@@ -387,20 +374,20 @@ public class StoreGUI extends JFrame {
             }
 
             try {
-                // Apelează ServiceOrder cu produsele din coșul temporar
+                // Apeleaza ServiceOrder cu produsele din cosul temporar
                 serviceOrder.placeOrder(loggedInUser.get().getId(), temporaryCart);
 
                 JOptionPane.showMessageDialog(this, "Order placed successfully! Stock updated.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 temporaryCart.clear();
                 updateCartDisplay();
-                loadProductData(); // Reîmprospătează stocul în tabel
+                loadProductData(); // Reimprospateaza stocul în tabel
 
             } catch (InvalidDataException ex) {
                 JOptionPane.showMessageDialog(this, "Order Failed: " + ex.getMessage(), "Transaction Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Adăugarea componentelor la Panoul de Input
+        // Adaugarea componentelor la Panoul de Input
         inputPanel.add(new JLabel("Selected Product Name:", SwingConstants.RIGHT));
         inputPanel.add(selectedProductNameField);
         inputPanel.add(new JLabel("Product ID (Auto-Selected):", SwingConstants.RIGHT));
@@ -436,12 +423,8 @@ public class StoreGUI extends JFrame {
         cartStatusLabel.setText(String.format("Cart: %d unique items | Total: %.2f RON", uniqueItems, total));
     }
 
-
-    // --- Panou 3: RAPOARTE  ---
-
-
     private JPanel createReportsPanel() {
-        // Folosim un BoxLayout pentru organizarea verticală clară
+
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(BACKGROUND_COLOR);
@@ -451,19 +434,19 @@ public class StoreGUI extends JFrame {
         float totalValue = serviceProduct.calculateTotalStockValue();
         int totalOrders = serviceOrder.findAllOrders().size();
 
-        // 2. Obține raportul detaliat pe produse
+        // 2. Obtine raportul detaliat pe produse
         Map<String, Integer> salesData = serviceOrder.getUnitsSoldPerProduct();
 
         // 3. Crearea zonei de text pentru raportul detaliat
         JTextArea salesReportArea = new JTextArea(15, 60);
         salesReportArea.setEditable(false);
         salesReportArea.setFont(new Font(Font.MONOSPACED, UI_FONT.getStyle(), UI_FONT.getSize()));
-        // Construiește conținutul raportului detaliat
+        // Construieste continutul raportului detaliat
         StringBuilder sb = new StringBuilder("\n--- Units Sold Per Product ---\n");
         sb.append(String.format("%-30s | %s\n", "Product Name", "Units Sold"));
         sb.append("----------------------------------------------------\n");
 
-        // Sortează raportul după cantitatea vândută (descrescător)
+        // Sorteaza raportul dupa cantitatea vanduta
         salesData.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
                 .forEach(entry -> {
@@ -482,19 +465,19 @@ public class StoreGUI extends JFrame {
         JLabel ordersLabel = new JLabel("Total Orders Placed: " + totalOrders);
         ordersLabel.setFont(HEADER_FONT);
 
-        // 4. Adaugă componentele la panou
+        // 4. Adauga componentele la panou
         panel.add(titleLabel);
-        panel.add(Box.createVerticalStrut(20)); // Spațiu
+        panel.add(Box.createVerticalStrut(20));
         panel.add(valueLabel);
         panel.add(ordersLabel);
-        panel.add(Box.createVerticalStrut(20)); // Spațiu
+        panel.add(Box.createVerticalStrut(20));
 
         panel.add(new JLabel("Detailed Sales Report (Sorted by Units Sold):"));
-        panel.add(new JScrollPane(salesReportArea)); // Adaugă zona de text cu raportul
+        panel.add(new JScrollPane(salesReportArea));
 
         return panel;
     }
-    // --- Metodă Utilitară pentru Stil ---
+    // --- Metodă Utilitara pentru Stil ---
     private void styleButton(JButton button) {
         button.setFont(HEADER_FONT);
         button.setBackground(Color.LIGHT_GRAY);
@@ -509,10 +492,8 @@ public class StoreGUI extends JFrame {
         button.setFocusPainted(false);
     }
 
-    // --- 0. ÎNCHIDERE ȘI SALVARE  ---
-
     private void shutdownAndSave() {
-        // Salvarea datelor la închiderea aplicației
+        // Salvarea datelor la inchiderea aplicatiei
         serviceProduct.shutdownApplicationAndSaveData();
         serviceClient.shutdownApplicationAndSaveData();
         serviceOrder.shutdownApplicationAndSaveData();
