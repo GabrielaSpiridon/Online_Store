@@ -6,6 +6,7 @@ import model.Product;
 import repository.IRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +40,38 @@ public class ServiceOrder {
     public void deleteOrder(int id) {
         orderRepository.delete(id);
         System.out.println("SERVICE: Order " + id + " deleted successfully.");
+    }
+
+    /**
+     * Calculează numărul total de unități comandate pentru fiecare produs.
+     * @return Map<String, Integer> unde cheia este numele produsului, iar valoarea este totalul unităților vândute.
+     */
+    private Product findRealProductDetails(int productId) {
+        return serviceProduct.findProductById(productId);
+    }
+
+    /**
+     * Calculează numărul total de unități comandate pentru fiecare produs.
+     * @return Map<String, Integer> unde cheia este numele produsului, iar valoarea este totalul unităților vândute.
+     */
+    public Map<String, Integer> getUnitsSoldPerProduct() {
+        Map<String, Integer> salesReport = new HashMap<>();
+        List<Order> allOrders = orderRepository.findAll();
+
+        for (Order order : allOrders) {
+            // Iterează prin produsele din coșul fiecărei comenzi
+            for (Map.Entry<Product, Integer> item : order.getProducts().entrySet()) {
+
+                Product realProduct = findRealProductDetails(item.getKey().getId());
+
+                if (realProduct != null) {
+                    String productName = realProduct.getName();
+                    int quantitySold = item.getValue();
+                    salesReport.put(productName, salesReport.getOrDefault(productName, 0) + quantitySold);
+                }
+            }
+        }
+        return salesReport;
     }
 
     /**

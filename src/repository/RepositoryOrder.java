@@ -91,6 +91,7 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
                         int id = Integer.parseInt(parts[0].trim());
                         int clientId = Integer.parseInt(parts[1].trim());
 
+                        // NOU: Deserializarea folosește o metodă care nu mai creează un mock
                         Map<Product,Integer> productsMap = deserializeProducts(parts[2].trim());
 
                         LocalDateTime orderDate = LocalDateTime.parse(parts[3].trim(),DATE_FORMATTER);
@@ -100,13 +101,11 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
                         Order o = new Order(id, clientId, productsMap, orderDate,status, totalAmount);
                         orders.put(id,o);
                     }catch (IllegalArgumentException e){
-                        // Include NumberFormatException și erori Enum.valueOf
                         throw new DataProcessingException("Parsing error at row " + lineNumber + ": invalid data type for order field.", e);
                     }
                 }
             } catch (FileNotFoundException e) {
                 throw new DataProcessingException("Order data file not found.", e);
-
             } catch (DataProcessingException e){
                 System.err.println("PERSISTENCE ERROR: " + e.getMessage());
             }
@@ -118,18 +117,14 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
         if (products.isEmpty()){
             return "";
         }
-
         StringBuilder sb = new StringBuilder();
-
         for(Map.Entry<Product, Integer> entry : products.entrySet()){
             sb.append(entry.getKey().getId())
                     .append(":")
                     .append(entry.getValue())
                     .append("|");
         }
-
         sb.deleteCharAt(sb.length()-1);
-
         return sb.toString();
     }
 
@@ -147,12 +142,11 @@ public class RepositoryOrder implements IRepository<Order,Integer>{
                     int productId = Integer.parseInt(parts[0].trim());
                     int quantity = Integer.parseInt(parts[1].trim());
 
-                    //Cream un obiect Product gol, deoarece nu putem accesa RepositoryProduct de aici
-                    Product mockProduct = new Product(productId, "Mock Product", 0.0f, ProductType.ELECTRONIC, 0, "Mock");
+                    Product minimalProduct = new Product(productId, "N/A", 0.0f, ProductType.ELECTRONIC, 0, "Minimal");
 
-                    productsMap.put(mockProduct,quantity);
+                    productsMap.put(minimalProduct,quantity);
                 }catch(NumberFormatException e){
-
+                    // Ignorăm
                 }
             }
         }

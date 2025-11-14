@@ -15,12 +15,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
-import java.util.Optional;
 
 /**
  * Interfata Grafica (GUI) a aplicatiei, folosind Java Swing (Cerința 7).
@@ -187,6 +185,7 @@ public class StoreGUI extends JFrame {
                         addressField.getText(), phoneField.getText());
 
                 serviceClient.saveOrUpdateClient(newClient);
+                serviceClient.shutdownApplicationAndSaveData();
                 JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.");
 
             } catch (InvalidDataException ex) {
@@ -439,27 +438,63 @@ public class StoreGUI extends JFrame {
     }
 
 
-    // --- Panou 3: RAPOARTE (Cerința 1) ---
+    // --- Panou 3: RAPOARTE  ---
+
 
     private JPanel createReportsPanel() {
-        JPanel panel = new JPanel(new GridLayout(0, 1, 10, 10));
+        // Folosim un BoxLayout pentru organizarea verticală clară
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(BACKGROUND_COLOR);
-        panel.setBorder(BorderFactory.createTitledBorder("Statistics"));
+        panel.setBorder(new EmptyBorder(15, 15, 15, 15)); // Padding consistent
 
+        // 1. Calcul Statistici Agregate
         float totalValue = serviceProduct.calculateTotalStockValue();
         int totalOrders = serviceOrder.findAllOrders().size();
 
+        // 2. Obține raportul detaliat pe produse
+        Map<String, Integer> salesData = serviceOrder.getUnitsSoldPerProduct();
+
+        // 3. Crearea zonei de text pentru raportul detaliat
+        JTextArea salesReportArea = new JTextArea(15, 60);
+        salesReportArea.setEditable(false);
+        salesReportArea.setFont(new Font(Font.MONOSPACED, UI_FONT.getStyle(), UI_FONT.getSize()));
+        // Construiește conținutul raportului detaliat
+        StringBuilder sb = new StringBuilder("\n--- Units Sold Per Product ---\n");
+        sb.append(String.format("%-30s | %s\n", "Product Name", "Units Sold"));
+        sb.append("----------------------------------------------------\n");
+
+        // Sortează raportul după cantitatea vândută (descrescător)
+        salesData.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
+                .forEach(entry -> {
+                    sb.append(String.format("%-30s | %d\n", entry.getKey(), entry.getValue()));
+                });
+
+        salesReportArea.setText(sb.toString());
+
+        // Etichete pentru sumare
+        JLabel titleLabel = new JLabel("Application Statistics Summary", SwingConstants.LEFT);
+        titleLabel.setFont(HEADER_FONT.deriveFont(Font.BOLD, 18));
+
         JLabel valueLabel = new JLabel("Total Stock Value: " + String.format("%.2f RON", totalValue));
         valueLabel.setFont(HEADER_FONT);
-        JLabel ordersLabel = new JLabel("Total Orders Placed:  " + totalOrders);
+
+        JLabel ordersLabel = new JLabel("Total Orders Placed: " + totalOrders);
         ordersLabel.setFont(HEADER_FONT);
 
+        // 4. Adaugă componentele la panou
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(20)); // Spațiu
         panel.add(valueLabel);
         panel.add(ordersLabel);
+        panel.add(Box.createVerticalStrut(20)); // Spațiu
+
+        panel.add(new JLabel("Detailed Sales Report (Sorted by Units Sold):"));
+        panel.add(new JScrollPane(salesReportArea)); // Adaugă zona de text cu raportul
 
         return panel;
     }
-
     // --- Metodă Utilitară pentru Stil ---
     private void styleButton(JButton button) {
         button.setFont(HEADER_FONT);
@@ -475,7 +510,7 @@ public class StoreGUI extends JFrame {
         button.setFocusPainted(false);
     }
 
-    // --- 0. ÎNCHIDERE ȘI SALVARE (Cerința 2) ---
+    // --- 0. ÎNCHIDERE ȘI SALVARE  ---
 
     private void shutdownAndSave() {
         // Salvarea datelor la închiderea aplicației
